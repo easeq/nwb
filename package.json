@@ -85,6 +85,7 @@
     "phantomjs-prebuilt": "2.1.16",
     "postcss-loader": "3.0.0",
     "promise": "8.0.2",
+    "react-hot-loader": "^4.7.1",
     "react-transform-catch-errors": "1.0.2",
     "react-transform-hmr": "1.0.4",
     "redbox-noreact": "1.1.0",
@@ -155,9 +156,12 @@
       ]
     ],
     "plugins": [
-      ["@babel/plugin-proposal-class-properties", {
-        "loose": true
-      }]
+      [
+        "@babel/plugin-proposal-class-properties",
+        {
+          "loose": true
+        }
+      ]
     ],
     "env": {
       "test": {
