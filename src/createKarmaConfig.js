@@ -137,7 +137,7 @@ export default function createKarmaConfig(args, buildConfig, pluginConfig, userC
   const testFiles = userKarma.testFiles || DEFAULT_TEST_FILES;
 
   // Polyfill by default for browsers which lack features (hello PhantomJS)
-  const files = [require.resolve('babel-polyfill/dist/polyfill.js')];
+  const files = [require.resolve('@babel/polyfill/dist/polyfill.js')];
   const preprocessors = {};
 
   if (userKarma.testContext) {
