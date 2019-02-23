@@ -1,8 +1,8 @@
 // @flow
-import path from 'path'
+import path from 'path';
 
-import {UserError} from './errors'
-import {typeOf} from './utils'
+import { UserError } from './errors';
+import { typeOf } from './utils';
 
 type BabelPluginConfig = string | [string, Object];
 
@@ -36,15 +36,15 @@ type UserOptions = {
   stage?: false | number,
 };
 
-const DEFAULT_STAGE = 2
-const RUNTIME_PATH = path.dirname(require.resolve('babel-runtime/package'))
+const DEFAULT_STAGE = 2;
+const RUNTIME_PATH = path.dirname(require.resolve('babel-runtime/package'));
 
 export default function createBabelConfig(
   buildConfig: BuildOptions = {},
   userConfig: UserOptions = {},
-  userConfigPath: string = ''
+  userConfigPath: string = '',
 ): BabelConfig {
-  let {
+  const {
     commonJSInterop,
     modules = false,
     plugins: buildPlugins = [],
@@ -53,76 +53,77 @@ export default function createBabelConfig(
     setRuntimePath,
     stage: buildStage = DEFAULT_STAGE,
     webpack = true,
-  } = buildConfig
+  } = buildConfig;
 
-  let {
+  const {
     cherryPick,
     config: userConfigFunction,
     env = {},
-    loose,
     plugins: userPlugins = [],
     presets: userPresets,
     reactConstantElements,
     removePropTypes: userRemovePropTypes,
     runtime: userRuntime,
     stage: userStage,
-  } = userConfig
+  } = userConfig;
 
-  let presets: BabelPluginConfig[] = []
-  let plugins: BabelPluginConfig[] = []
+  let { loose } = userConfig;
+
+  let presets: BabelPluginConfig[] = [];
+  let plugins: BabelPluginConfig[] = [];
 
   // Default to loose mode unless explicitly configured
   if (typeOf(loose) === 'undefined') {
-    loose = true
+    loose = true;
   }
 
   presets.push(
-    [require.resolve('babel-preset-env'), {loose, modules, ...env}]
-  )
+    [require.resolve('babel-preset-env'), { loose, modules, ...env }],
+  );
 
   // Additional build presets
   if (Array.isArray(buildPresets)) {
-    buildPresets.forEach(preset => {
+    buildPresets.forEach((preset) => {
       // Presets which are configurable via user config are specified by name so
       // customisation can be handled in this module.
       if (preset === 'react-prod') {
         // Hoist static element subtrees up so React can skip them when reconciling
         if (reactConstantElements !== false) {
-          plugins.push(require.resolve('babel-plugin-transform-react-constant-elements'))
+          plugins.push(require.resolve('babel-plugin-transform-react-constant-elements'));
         }
         // Remove or wrap propTypes and optionally remove prop-types imports
         if (userRemovePropTypes !== false) {
           plugins.push([
             require.resolve('babel-plugin-transform-react-remove-prop-types'),
-            typeof userRemovePropTypes === 'object' ? userRemovePropTypes : {}
-          ])
+            typeof userRemovePropTypes === 'object' ? userRemovePropTypes : {},
+          ]);
         }
       }
       // All other presets are assumed to be paths to a preset module
       else {
-        presets.push(preset)
+        presets.push(preset);
       }
-    })
+    });
   }
 
   // Stage preset
-  let stage = userStage != null ? userStage : buildStage
-  if (typeof stage == 'number') {
-    presets.push(require.resolve(`babel-preset-stage-${stage}`))
+  const stage = userStage != null ? userStage : buildStage;
+  if (typeof stage === 'number') {
+    presets.push(require.resolve(`babel-preset-stage-${stage}`));
     // Decorators are stage 2 but not supported by Babel yet - add the legacy
     // transform for support in the meantime.
     if (stage <= 2) {
-      plugins.push(require.resolve('babel-plugin-transform-decorators-legacy'))
+      plugins.push(require.resolve('babel-plugin-transform-decorators-legacy'));
     }
   }
 
   if (userPresets) {
-    presets = presets.concat(userPresets)
+    presets = presets.concat(userPresets);
   }
 
-  let config: BabelConfig = {presets}
+  let config: BabelConfig = { presets };
 
-  plugins = plugins.concat(buildPlugins, userPlugins)
+  plugins = plugins.concat(buildPlugins, userPlugins);
 
   // App builds use the 'react-prod' preset to remove/wrap propTypes, component
   // builds use this config instead.
@@ -132,9 +133,9 @@ export default function createBabelConfig(
       plugins.push(
         [require.resolve('babel-plugin-transform-react-remove-prop-types'), {
           ...typeof buildRemovePropTypes === 'object' ? buildRemovePropTypes : {},
-          ...typeof userRemovePropTypes === 'object' ? userRemovePropTypes : {}
-        }]
-      )
+          ...typeof userRemovePropTypes === 'object' ? userRemovePropTypes : {},
+        }],
+      );
     }
   }
 
@@ -145,53 +146,52 @@ export default function createBabelConfig(
     helpers: false,
     polyfill: false,
     regenerator: true,
-  }
+  };
   if (setRuntimePath !== false) {
-    runtimeTransformOptions.moduleName = RUNTIME_PATH
+    runtimeTransformOptions.moduleName = RUNTIME_PATH;
   }
   if (userRuntime !== false) {
     if (userRuntime === true) {
       // Enable all features
-      runtimeTransformOptions = {}
+      runtimeTransformOptions = {};
       if (setRuntimePath !== false) {
-        runtimeTransformOptions.moduleName = RUNTIME_PATH
+        runtimeTransformOptions.moduleName = RUNTIME_PATH;
       }
-    }
-    else if (typeOf(userRuntime) === 'string') {
+    } else if (typeOf(userRuntime) === 'string') {
       // Enable the named feature
-      runtimeTransformOptions[userRuntime] = true
+      runtimeTransformOptions[userRuntime] = true;
     }
-    plugins.push([require.resolve('babel-plugin-transform-runtime'), runtimeTransformOptions])
+    plugins.push([require.resolve('babel-plugin-transform-runtime'), runtimeTransformOptions]);
   }
 
   // Allow Babel to parse (but not transform) import() when used with Webpack
   if (webpack) {
-    plugins.push(require.resolve('babel-plugin-syntax-dynamic-import'))
+    plugins.push(require.resolve('babel-plugin-syntax-dynamic-import'));
   }
 
   // Provide CommonJS interop so users don't have to tag a .default onto their
   // imports if they're using vanilla Node.js require().
   if (commonJSInterop) {
-    plugins.push(require.resolve('babel-plugin-add-module-exports'))
+    plugins.push(require.resolve('babel-plugin-add-module-exports'));
   }
 
   // The lodash plugin supports generic cherry-picking for named modules
   if (cherryPick) {
-    plugins.push([require.resolve('babel-plugin-lodash'), {id: cherryPick}])
+    plugins.push([require.resolve('babel-plugin-lodash'), { id: cherryPick }]);
   }
 
   if (plugins.length > 0) {
-    config.plugins = plugins
+    config.plugins = plugins;
   }
 
   // Finally, give the user a chance to do whatever they want with the generated
   // config.
   if (typeof userConfigFunction === 'function') {
-    config = userConfigFunction(config)
+    config = userConfigFunction(config);
     if (!config) {
-      throw new UserError(`babel.config() in ${userConfigPath} didn't return anything - it must return the Babel config object.`)
+      throw new UserError(`babel.config() in ${userConfigPath} didn't return anything - it must return the Babel config object.`);
     }
   }
 
-  return config
+  return config;
 }

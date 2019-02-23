@@ -1,21 +1,21 @@
-import path from 'path'
+import path from 'path';
 
-import merge from 'webpack-merge'
+import merge from 'webpack-merge';
 
-import createWebpackConfig from './createWebpackConfig'
-import debug from './debug'
-import {UserError} from './errors'
-import {deepToString, typeOf} from './utils'
+import createWebpackConfig from './createWebpackConfig';
+import debug from './debug';
+import { UserError } from './errors';
+import { deepToString, typeOf } from './utils';
 
 // The following defaults are combined into a single extglob-style pattern to
 // avoid generating "pattern ... does not match any file" warnings.
 
 // Exclude top-level test dirs and __tests__ dirs under src/ from code coverage
 // by default.
-const DEFAULT_EXCLUDE_FROM_COVERAGE = ['test/', 'tests/', 'src/**/__tests__/']
+const DEFAULT_EXCLUDE_FROM_COVERAGE = ['test/', 'tests/', 'src/**/__tests__/'];
 // Not every file in a test directory is a test and tests may also be co-located
 // with the code they test, so determine test files by suffix.
-const DEFAULT_TEST_FILES = ['+(src|test?(s))/**/*+(-test|.spec|.test).js']
+const DEFAULT_TEST_FILES = ['+(src|test?(s))/**/*+(-test|.spec|.test).js'];
 
 /**
  * Browser, framework and reporter config can be passed as strings or as plugin
@@ -24,18 +24,17 @@ const DEFAULT_TEST_FILES = ['+(src|test?(s))/**/*+(-test|.spec|.test).js']
  * plugin object.
  */
 export function processPluginConfig(configs) {
-  let names = []
-  let plugins = []
-  configs.forEach(config => {
+  const names = [];
+  const plugins = [];
+  configs.forEach((config) => {
     if (typeOf(config) === 'string') {
-      names.push(config)
+      names.push(config);
+    } else {
+      names.push(Object.keys(config)[0].split(':').pop());
+      plugins.push(config);
     }
-    else {
-      names.push(Object.keys(config)[0].split(':').pop())
-      plugins.push(config)
-    }
-  })
-  return [names, plugins]
+  });
+  return [names, plugins];
 }
 
 /**
@@ -45,123 +44,125 @@ export function processPluginConfig(configs) {
 export function findPlugin(plugins, findId) {
   for (let i = 0, l = plugins.length; i < l; i++) {
     if (typeOf(plugins[i]) !== 'object') {
-      continue
+      continue;
     }
     if (Object.keys(plugins[i])[0] === findId) {
-      return plugins[i]
+      return plugins[i];
     }
   }
-  return null
+  return null;
 }
 
 /**
  * Handles creation of Karma config based on Karma plugins.
  */
-export function getKarmaPluginConfig({codeCoverage = false, userConfig = {}} = {}) {
-  let browsers = ['PhantomJS']
-  let frameworks = ['mocha']
+export function getKarmaPluginConfig({ codeCoverage = false, userConfig = {} } = {}) {
+  let browsers = ['PhantomJS'];
+  let frameworks = ['mocha'];
   let plugins = [
     require('karma-sourcemap-loader'),
     require('karma-webpack'),
-  ]
+  ];
   // Default reporter if the user configure their own frameworks
-  let reporters = ['dots']
+  let reporters = ['dots'];
 
   // Browsers, frameworks and reporters can be configured as a list containing
   // names of bundled plugins, or plugin objects.
   if (userConfig.browsers) {
-    let [browserNames, browserPlugins] = processPluginConfig(userConfig.browsers)
-    browsers = browserNames
-    plugins = plugins.concat(browserPlugins)
+    const [browserNames, browserPlugins] = processPluginConfig(userConfig.browsers);
+    browsers = browserNames;
+    plugins = plugins.concat(browserPlugins);
   }
 
   if (userConfig.frameworks) {
-    let [frameworkNames, frameworkPlugins] = processPluginConfig(userConfig.frameworks)
-    frameworks = frameworkNames
-    plugins = plugins.concat(frameworkPlugins)
-  }
-  else {
+    const [frameworkNames, frameworkPlugins] = processPluginConfig(userConfig.frameworks);
+    frameworks = frameworkNames;
+    plugins = plugins.concat(frameworkPlugins);
+  } else {
     // Use the Mocha reporter by default if the user didn't configure frameworks
-    reporters = ['mocha']
+    reporters = ['mocha'];
   }
 
   if (userConfig.reporters) {
-    let [reporterNames, reporterPlugins] = processPluginConfig(userConfig.reporters)
-    reporters = reporterNames
-    plugins = plugins.concat(reporterPlugins)
+    const [reporterNames, reporterPlugins] = processPluginConfig(userConfig.reporters);
+    reporters = reporterNames;
+    plugins = plugins.concat(reporterPlugins);
   }
 
   // Plugins can be provided as a list of imported plugin objects
   if (userConfig.plugins) {
-    plugins = plugins.concat(userConfig.plugins)
+    plugins = plugins.concat(userConfig.plugins);
   }
 
   // Ensure nwb's version of plugins get loaded if they're going to be used and =
   // haven't been provided by the user.
   if (frameworks.indexOf('mocha') !== -1 && !findPlugin(plugins, 'framework:mocha')) {
-    plugins.push(require('karma-mocha'))
+    plugins.push(require('karma-mocha'));
   }
   if (reporters.indexOf('mocha') !== -1 && !findPlugin(plugins, 'reporter:mocha')) {
-    plugins.push(require('karma-mocha-reporter'))
+    plugins.push(require('karma-mocha-reporter'));
   }
   if (browsers.indexOf('PhantomJS') !== -1 && !findPlugin(plugins, 'launcher:PhantomJS')) {
-    plugins.push(require('karma-phantomjs-launcher'))
+    plugins.push(require('karma-phantomjs-launcher'));
   }
-  if (browsers.some(function matchChrom(b) { return /Chrom/.test(b) }) &&
-      !findPlugin(plugins, 'launcher:Chrome')) {
-    plugins.push(require('karma-chrome-launcher'))
+  if (browsers.some(b => /Chrom/.test(b))
+      && !findPlugin(plugins, 'launcher:Chrome')) {
+    plugins.push(require('karma-chrome-launcher'));
   }
 
   if (codeCoverage) {
-    plugins.push(require('karma-coverage'))
-    reporters.push('coverage')
+    plugins.push(require('karma-coverage'));
+    reporters.push('coverage');
   }
 
-  return {browsers, frameworks, plugins, reporters}
+  return {
+    browsers, frameworks, plugins, reporters,
+  };
 }
 
 export default function createKarmaConfig(args, buildConfig, pluginConfig, userConfig) {
-  let isCi = process.env.CI || process.env.CONTINUOUS_INTEGRATION
-  let codeCoverage = isCi || !!args.coverage
+  const isCi = process.env.CI || process.env.CONTINUOUS_INTEGRATION;
+  const codeCoverage = isCi || !!args.coverage;
 
-  let userKarma = userConfig.karma || {}
+  const userKarma = userConfig.karma || {};
 
-  let {browsers, frameworks, plugins, reporters} = getKarmaPluginConfig({
+  const {
+    browsers, frameworks, plugins, reporters,
+  } = getKarmaPluginConfig({
     codeCoverage,
     userConfig: userKarma,
-  })
+  });
 
-  let {excludeFromCoverage = DEFAULT_EXCLUDE_FROM_COVERAGE} = userKarma
-  let testFiles = userKarma.testFiles || DEFAULT_TEST_FILES
+  const { excludeFromCoverage = DEFAULT_EXCLUDE_FROM_COVERAGE } = userKarma;
+  const testFiles = userKarma.testFiles || DEFAULT_TEST_FILES;
 
   // Polyfill by default for browsers which lack features (hello PhantomJS)
-  let files = [require.resolve('babel-polyfill/dist/polyfill.js')]
-  let preprocessors = {}
+  const files = [require.resolve('babel-polyfill/dist/polyfill.js')];
+  const preprocessors = {};
 
   if (userKarma.testContext) {
-    files.push(userKarma.testContext)
-    preprocessors[userKarma.testContext] = ['webpack', 'sourcemap']
-  }
-  else {
-    testFiles.forEach(testGlob => {
-      files.push(testGlob)
-      preprocessors[testGlob] = ['webpack', 'sourcemap']
-    })
+    files.push(userKarma.testContext);
+    preprocessors[userKarma.testContext] = ['webpack', 'sourcemap'];
+  } else {
+    testFiles.forEach((testGlob) => {
+      files.push(testGlob);
+      preprocessors[testGlob] = ['webpack', 'sourcemap'];
+    });
   }
 
   // Tweak Babel config for code coverage when necessary
-  buildConfig = {...buildConfig}
+  buildConfig = { ...buildConfig };
   if (!buildConfig.babel) {
-    buildConfig.babel = {}
+    buildConfig.babel = {};
   }
   if (codeCoverage) {
-    let exclude = ['node_modules/', ...excludeFromCoverage, ...testFiles]
+    const exclude = ['node_modules/', ...excludeFromCoverage, ...testFiles];
     if (userKarma.testContext) {
-      exclude.push(userKarma.testContext)
+      exclude.push(userKarma.testContext);
     }
     buildConfig.babel.plugins = [
-      [require.resolve('babel-plugin-istanbul'), {exclude}]
-    ]
+      [require.resolve('babel-plugin-istanbul'), { exclude }],
+    ];
   }
 
   let karmaConfig = {
@@ -169,9 +170,9 @@ export default function createKarmaConfig(args, buildConfig, pluginConfig, userC
     coverageReporter: {
       dir: path.resolve('coverage'),
       reporters: [
-        {type: 'html', subdir: 'html'},
-        {type: 'lcovonly', subdir: '.'},
-        {type: 'text-summary'},
+        { type: 'html', subdir: 'html' },
+        { type: 'lcovonly', subdir: '.' },
+        { type: 'text-summary' },
       ],
     },
     files,
@@ -191,7 +192,7 @@ export default function createKarmaConfig(args, buildConfig, pluginConfig, userC
       plugins: {
         status: {
           quiet: true,
-        }
+        },
       },
       resolve: {
         alias: {
@@ -204,25 +205,25 @@ export default function createKarmaConfig(args, buildConfig, pluginConfig, userC
       },
     }), pluginConfig, userConfig),
     webpackMiddleware: {
-      logLevel: 'silent'
+      logLevel: 'silent',
     },
-  }
+  };
 
   // Any extra user Karma config is merged into the generated config to give
   // them even more control.
   if (userKarma.extra) {
-    karmaConfig = merge(karmaConfig, userKarma.extra)
+    karmaConfig = merge(karmaConfig, userKarma.extra);
   }
 
   // Finally, give the user a chance to do whatever they want with the generated
   // config.
   if (typeOf(userKarma.config) === 'function') {
-    karmaConfig = userKarma.config(karmaConfig)
+    karmaConfig = userKarma.config(karmaConfig);
     if (!karmaConfig) {
-      throw new UserError(`karma.config() in ${userConfig.path} didn't return anything - it must return the Karma config object.`)
+      throw new UserError(`karma.config() in ${userConfig.path} didn't return anything - it must return the Karma config object.`);
     }
   }
 
-  debug('karma config: %s', deepToString(karmaConfig))
-  return karmaConfig
+  debug('karma config: %s', deepToString(karmaConfig));
+  return karmaConfig;
 }

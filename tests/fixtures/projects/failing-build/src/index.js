@@ -1,1 +1,1 @@
-import 'abc'
+import 'abc';

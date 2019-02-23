@@ -1,1 +1,1 @@
-module.exports = require('./lib/expressMiddleware')
+module.exports = require('./lib/expressMiddleware');

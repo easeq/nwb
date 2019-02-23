@@ -1,10 +1,10 @@
-import opn from 'opn'
-import webpack from 'webpack'
-import WebpackDevServer from 'webpack-dev-server'
-import merge from 'webpack-merge'
+import opn from 'opn';
+import webpack from 'webpack';
+import WebpackDevServer from 'webpack-dev-server';
+import merge from 'webpack-merge';
 
-import debug from './debug'
-import {deepToString, typeOf} from './utils'
+import debug from './debug';
+import { deepToString, typeOf } from './utils';
 
 /**
  * Use Webpack Dev Server to build and serve assets using Webpack's watch mode,
@@ -13,13 +13,15 @@ import {deepToString, typeOf} from './utils'
  * Static content is handled by CopyPlugin.
  */
 export default function devServer(webpackConfig, serverConfig, url, cb) {
-  let compiler = webpack(webpackConfig)
+  const compiler = webpack(webpackConfig);
 
-  let {host, open, port, ...otherServerConfig} = serverConfig
+  const {
+    host, open, port, ...otherServerConfig
+  } = serverConfig;
 
-  let webpackDevServerOptions = merge({
+  const webpackDevServerOptions = merge({
     headers: {
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': '*',
     },
     historyApiFallback: true,
     hot: true,
@@ -29,18 +31,18 @@ export default function devServer(webpackConfig, serverConfig, url, cb) {
     watchOptions: {
       ignored: /node_modules/,
     },
-  }, otherServerConfig)
+  }, otherServerConfig);
 
-  debug('webpack dev server options: %s', deepToString(webpackDevServerOptions))
+  debug('webpack dev server options: %s', deepToString(webpackDevServerOptions));
 
-  let server = new WebpackDevServer(compiler, webpackDevServerOptions)
+  const server = new WebpackDevServer(compiler, webpackDevServerOptions);
   server.listen(port, host, (err) => {
-    if (err) return cb(err)
+    if (err) return cb(err);
     if (open) {
       // --open
-      if (typeOf(open) === 'boolean') opn(url)
+      if (typeOf(open) === 'boolean') opn(url);
       // --open=firefox
-      else opn(url, {app: open})
+      else opn(url, { app: open });
     }
-  })
+  });
 }

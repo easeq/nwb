@@ -1,3 +1,3 @@
-import debug from 'debug'
+import debug from 'debug';
 
-export default debug('nwb')
+export default debug('nwb');

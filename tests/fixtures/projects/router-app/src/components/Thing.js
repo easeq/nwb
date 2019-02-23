@@ -1,11 +1,13 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react';
 
 class Thing extends Component {
   render() {
-    return <div className="Thing">
+    return (
+      <div className="Thing">
       Thing
-    </div>
+      </div>
+    );
   }
 }
 
-export default Thing
+export default Thing;

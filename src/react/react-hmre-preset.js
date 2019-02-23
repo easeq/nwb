@@ -6,13 +6,13 @@ module.exports = {
         {
           transform: require.resolve('react-transform-hmr'),
           imports: ['react'],
-          locals: ['module']
+          locals: ['module'],
         },
         {
           transform: require.resolve('react-transform-catch-errors'),
-          imports: ['react', require.resolve('redbox-noreact')]
-        }
-      ]
-    }]
-  ]
-}
+          imports: ['react', require.resolve('redbox-noreact')],
+        },
+      ],
+    }],
+  ],
+};

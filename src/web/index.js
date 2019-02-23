@@ -1,18 +1,18 @@
 // @flow
 
 function getBaseConfig() {
-  return {}
+  return {};
 }
 
 function getDependencies() {
-  return []
+  return [];
 }
 
 function getQuickConfig() {
   return {
     commandConfig: getBaseConfig(),
     defaultTitle: 'Web App',
-  }
+  };
 }
 
 // Vanilla JavaScript apps just use the default config for everything
@@ -29,9 +29,9 @@ export default (args: Object) => ({
   getQuickServeConfig() {
     // Reload on unaccepted HMR changes by default; disable with --no-reload
     if (args.reload !== false) {
-      args.reload = true
+      args.reload = true;
     }
-    return getQuickConfig()
+    return getQuickConfig();
   },
   getKarmaTestConfig: getBaseConfig,
-})
+});

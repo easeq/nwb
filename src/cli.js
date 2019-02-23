@@ -1,32 +1,34 @@
 // @flow
-import path from 'path'
+import path from 'path';
 
-import {cyan as opt, green as cmd, red, yellow as req} from 'chalk'
-import parseArgs from 'minimist'
-import semver from 'semver'
+import {
+  cyan as opt, green as cmd, red, yellow as req,
+} from 'chalk';
+import parseArgs from 'minimist';
+import semver from 'semver';
 
-import {CONFIG_FILE_NAME} from './constants'
-import {UserError} from './errors'
-import {modulePath} from './utils'
+import { CONFIG_FILE_NAME } from './constants';
+import { UserError } from './errors';
+import { modulePath } from './utils';
 
-import type {ErrBack} from './types'
+import type { ErrBack } from './types';
 
 export default function cli(argv: string[], cb: ErrBack) {
-  let args = parseArgs(argv, {
+  const args = parseArgs(argv, {
     alias: {
       c: 'config',
       h: 'help',
       v: 'version',
     },
     boolean: ['help', 'version'],
-  })
+  });
 
-  let command = args._[0]
+  const command = args._[0];
 
   if (args.version || /^v(ersion)?$/.test(command)) {
-    let pkg = require('../package.json')
-    console.log(`v${pkg.version}`)
-    process.exit(0)
+    const pkg = require('../package.json');
+    console.log(`v${pkg.version}`);
+    process.exit(0);
   }
 
   if (args.help || !command || /^h(elp)?$/.test(command)) {
@@ -188,73 +190,70 @@ Helper commands:
     Options:
       ${opt('--command')}  nwb command name to use when checking your config
       ${opt('-e, --env')}  NODE_ENV to use when checking your config: dev, test or prod
-`)
-    process.exit(args.help || command ? 0 : 1)
+`);
+    process.exit(args.help || command ? 0 : 1);
   }
 
-  let unknownCommand = () => {
-    console.error(`${red('Unknown command:')} ${req(command)}`)
-    process.exit(1)
-  }
+  const unknownCommand = () => {
+    console.error(`${red('Unknown command:')} ${req(command)}`);
+    process.exit(1);
+  };
 
   // Validate the command is in foo-bar-baz format before trying to resolve a
   // module path with it.
   if (!/^[a-z]+(?:-[a-z]+)*$/.test(command)) {
-    return unknownCommand()
+    return unknownCommand();
   }
 
-  let commandModulePath
+  let commandModulePath;
   try {
-    commandModulePath = require.resolve(`./commands/${command}`)
-  }
-  catch (e) {
+    commandModulePath = require.resolve(`./commands/${command}`);
+  } catch (e) {
     // XXX Flow complains that commandModulePath might be uninitialised if we
     //     return from here.
   }
   if (commandModulePath == null) {
-    return unknownCommand()
+    return unknownCommand();
   }
 
   // Check if the user is running a version of nwb from outside their project
   // which doesn't satisfy what's specified in package.json (when available).
   if (/^(build|check|clean|serve|test)/.test(command)) {
-    let localNwbPath = null
+    let localNwbPath = null;
     try {
-      localNwbPath = modulePath('nwb')
-    }
-    catch (e) {
+      localNwbPath = modulePath('nwb');
+    } catch (e) {
       // nwb isn't installed locally to where the command is being run
     }
 
-    let runningNwbPath = path.dirname(require.resolve('../package'))
+    const runningNwbPath = path.dirname(require.resolve('../package'));
 
     if (localNwbPath !== runningNwbPath) {
-      let pkg = null
+      let pkg = null;
       try {
-        pkg = require(path.resolve('package.json'))
-      }
-      catch (e) {
+        pkg = require(path.resolve('package.json'));
+      } catch (e) {
         // pass
       }
-      let requiredNwbVersion = pkg && (
-        (pkg.devDependencies && pkg.devDependencies.nwb) ||
-        (pkg.dependencies && pkg.dependencies.nwb)
-      )
+      const requiredNwbVersion = pkg && (
+        (pkg.devDependencies && pkg.devDependencies.nwb)
+        || (pkg.dependencies && pkg.dependencies.nwb)
+      );
       if (requiredNwbVersion) {
-        let runningNwbVersion = require('../package').version
+        const runningNwbVersion = require('../package').version;
         if (!semver.satisfies(runningNwbVersion, requiredNwbVersion)) {
           return cb(new UserError(
-            `The version of nwb you're running (v${runningNwbVersion}, from ${runningNwbPath}) ` +
-            `doesn't satisfy the version specified in ${path.resolve('package.json')} (${requiredNwbVersion}).`
-          ))
+            `The version of nwb you're running (v${runningNwbVersion}, from ${runningNwbPath}) `
+            + `doesn't satisfy the version specified in ${path.resolve('package.json')} (${requiredNwbVersion}).`,
+          ));
         }
       }
     }
   }
 
-  let commandModule = require(commandModulePath)
+  const commandModule = require(commandModulePath);
   // Quick commands handle running themselves
   if (typeof commandModule === 'function') {
-    commandModule(args, cb)
+    commandModule(args, cb);
   }
 }

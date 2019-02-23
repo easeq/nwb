@@ -1,12 +1,12 @@
 // @flow
-import preactConfig from '../preact'
-import {serve} from '../appCommands'
+import preactConfig from '../preact';
+import { serve } from '../appCommands';
 
-import type {ErrBack} from '../types'
+import type { ErrBack } from '../types';
 
 /**
  * Serve a Preact app.
  */
 export default function servePreact(args: Object, cb: ErrBack) {
-  serve(args, preactConfig(args), cb)
+  serve(args, preactConfig(args), cb);
 }

@@ -15,7 +15,7 @@ module.exports = {
     reactConstantElements: 45,
     runtime: 45,
     stage: 45,
-    config: 45
+    config: 45,
   },
   devServer: 45,
   karma: {
@@ -28,7 +28,7 @@ module.exports = {
     testContext: 45,
     testFiles: 45,
     extra: 45,
-    config: 45
+    config: 45,
   },
   npm: {
     invalidNpmBuildConfig: true,
@@ -38,7 +38,7 @@ module.exports = {
       invalidUMDConfig: true,
       global: 45,
       externals: 45,
-    }
+    },
   },
   webpack: {
     invalidWebpackConfig: true,
@@ -63,5 +63,5 @@ module.exports = {
     terser: 45,
     extra: 45,
     config: 45,
-  }
-}
+  },
+};

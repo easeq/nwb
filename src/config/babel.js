@@ -1,11 +1,11 @@
-import chalk from 'chalk'
+import chalk from 'chalk';
 
-import {pluralise as s, typeOf} from '../utils'
+import { pluralise as s, typeOf } from '../utils';
 
-const BABEL_RUNTIME_OPTIONS = new Set(['helpers', 'polyfill'])
+const BABEL_RUNTIME_OPTIONS = new Set(['helpers', 'polyfill']);
 
-export function processBabelConfig({report, userConfig}) {
-  let {
+export function processBabelConfig({ report, userConfig }) {
+  const {
     cherryPick,
     env,
     loose,
@@ -17,16 +17,16 @@ export function processBabelConfig({report, userConfig}) {
     stage,
     config,
     ...unexpectedConfig
-  } = userConfig.babel
+  } = userConfig.babel;
 
-  let unexpectedProps = Object.keys(unexpectedConfig)
+  const unexpectedProps = Object.keys(unexpectedConfig);
   if (unexpectedProps.length > 0) {
     report.error(
       'babel',
       unexpectedProps.join(', '),
-      `Unexpected prop${s(unexpectedProps.length)} in ${chalk.cyan('babel')} config - ` +
-      'see https://github.com/insin/nwb/blob/master/docs/Configuration.md#babel-configuration for supported config'
-    )
+      `Unexpected prop${s(unexpectedProps.length)} in ${chalk.cyan('babel')} config - `
+      + 'see https://github.com/insin/nwb/blob/master/docs/Configuration.md#babel-configuration for supported config',
+    );
   }
 
   // cherryPick
@@ -35,8 +35,8 @@ export function processBabelConfig({report, userConfig}) {
       report.error(
         'babel.cherryPick',
         cherryPick,
-        `Must be a ${chalk.cyan('String')} or an ${chalk.cyan('Array')}`
-      )
+        `Must be a ${chalk.cyan('String')} or an ${chalk.cyan('Array')}`,
+      );
     }
   }
 
@@ -46,8 +46,8 @@ export function processBabelConfig({report, userConfig}) {
       report.error(
         'babel.env',
         env,
-        `Must be an ${chalk.cyan('Object')}`
-      )
+        `Must be an ${chalk.cyan('Object')}`,
+      );
     }
   }
 
@@ -57,36 +57,34 @@ export function processBabelConfig({report, userConfig}) {
       report.error(
         'babel.loose',
         loose,
-        `Must be ${chalk.cyan('Boolean')}`
-      )
+        `Must be ${chalk.cyan('Boolean')}`,
+      );
     }
   }
 
   // plugins
   if ('plugins' in userConfig.babel) {
     if (typeOf(plugins) === 'string') {
-      userConfig.babel.plugins = [plugins]
-    }
-    else if (typeOf(userConfig.babel.plugins) !== 'array') {
+      userConfig.babel.plugins = [plugins];
+    } else if (typeOf(userConfig.babel.plugins) !== 'array') {
       report.error(
         'babel.plugins',
         plugins,
-        `Must be a ${chalk.cyan('String')} or an ${chalk.cyan('Array')}`
-      )
+        `Must be a ${chalk.cyan('String')} or an ${chalk.cyan('Array')}`,
+      );
     }
   }
 
   // presets
   if ('presets' in userConfig.babel) {
     if (typeOf(presets) === 'string') {
-      userConfig.babel.presets = [presets]
-    }
-    else if (typeOf(presets) !== 'array') {
+      userConfig.babel.presets = [presets];
+    } else if (typeOf(presets) !== 'array') {
       report.error(
         'babel.presets',
         presets,
-        `Must be a ${chalk.cyan('String')} or an ${chalk.cyan('Array')}`
-      )
+        `Must be a ${chalk.cyan('String')} or an ${chalk.cyan('Array')}`,
+      );
     }
   }
 
@@ -94,11 +92,11 @@ export function processBabelConfig({report, userConfig}) {
   if ('removePropTypes' in userConfig.babel) {
     if (removePropTypes !== false && typeOf(removePropTypes) !== 'object') {
       report.error(
-        `babel.removePropTypes`,
+        'babel.removePropTypes',
         removePropTypes,
-        `Must be ${chalk.cyan('false')} (to disable removal of PropTypes) ` +
-        `or an ${chalk.cyan('Object')} (to configure react-remove-prop-types)`
-      )
+        `Must be ${chalk.cyan('false')} (to disable removal of PropTypes) `
+        + `or an ${chalk.cyan('Object')} (to configure react-remove-prop-types)`,
+      );
     }
   }
 
@@ -108,20 +106,20 @@ export function processBabelConfig({report, userConfig}) {
       report.error(
         'babel.reactConstantElements',
         reactConstantElements,
-        `Must be ${chalk.cyan('Boolean')}`
-      )
+        `Must be ${chalk.cyan('Boolean')}`,
+      );
     }
   }
 
   // runtime
-  if ('runtime' in userConfig.babel &&
-      typeOf(runtime) !== 'boolean' &&
-      !BABEL_RUNTIME_OPTIONS.has(runtime)) {
+  if ('runtime' in userConfig.babel
+      && typeOf(runtime) !== 'boolean'
+      && !BABEL_RUNTIME_OPTIONS.has(runtime)) {
     report.error(
       'babel.runtime',
       runtime,
-      `Must be ${chalk.cyan('Boolean')}, ${chalk.cyan("'helpers'")} or ${chalk.cyan("'polyfill'")}`
-    )
+      `Must be ${chalk.cyan('Boolean')}, ${chalk.cyan("'helpers'")} or ${chalk.cyan("'polyfill'")}`,
+    );
   }
 
   // stage
@@ -131,26 +129,25 @@ export function processBabelConfig({report, userConfig}) {
         report.error(
           'babel.stage',
           stage,
-          `Must be between ${chalk.cyan(0)} and ${chalk.cyan(3)}`
-        )
+          `Must be between ${chalk.cyan(0)} and ${chalk.cyan(3)}`,
+        );
       }
-    }
-    else if (stage !== false) {
+    } else if (stage !== false) {
       report.error(
         'babel.stage',
         stage,
-        `Must be a ${chalk.cyan('Number')} between ${chalk.cyan('0')} and ${chalk.cyan('3')} (to choose a stage preset), ` +
-        `or ${chalk.cyan('false')} (to disable use of a stage preset)`
-      )
+        `Must be a ${chalk.cyan('Number')} between ${chalk.cyan('0')} and ${chalk.cyan('3')} (to choose a stage preset), `
+        + `or ${chalk.cyan('false')} (to disable use of a stage preset)`,
+      );
     }
   }
 
   // config
   if ('config' in userConfig.babel && typeOf(config) !== 'function') {
     report.error(
-      `babel.config`,
+      'babel.config',
       `type: ${typeOf(config)}`,
-      `Must be a ${chalk.cyan('Function')}`
-    )
+      `Must be a ${chalk.cyan('Function')}`,
+    );
   }
 }

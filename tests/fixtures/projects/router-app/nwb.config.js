@@ -1,13 +1,13 @@
-var path = require('path')
+const path = require('path');
 
 module.exports = {
   type: 'react-app',
   babel: {
-    cherryPick: 'react-router'
+    cherryPick: 'react-router',
   },
   webpack: {
     aliases: {
-      'src': path.resolve('src')
-    }
-  }
-}
+      src: path.resolve('./src'),
+    },
+  },
+};

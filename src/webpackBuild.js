@@ -1,11 +1,11 @@
-import ora from 'ora'
-import webpack from 'webpack'
+import ora from 'ora';
+import webpack from 'webpack';
 
-import {getPluginConfig, getUserConfig} from './config'
-import createWebpackConfig from './createWebpackConfig'
-import debug from './debug'
-import {deepToString} from './utils'
-import {logBuildResults} from './webpackUtils'
+import { getPluginConfig, getUserConfig } from './config';
+import createWebpackConfig from './createWebpackConfig';
+import debug from './debug';
+import { deepToString } from './utils';
+import { logBuildResults } from './webpackUtils';
 
 /**
  * If you pass a non-falsy type, this will handle spinner display and output
@@ -13,50 +13,48 @@ import {logBuildResults} from './webpackUtils'
  */
 export default function webpackBuild(type, args, buildConfig, cb) {
   if (!process.env.NODE_ENV) {
-    process.env.NODE_ENV = 'production'
+    process.env.NODE_ENV = 'production';
   }
 
-  let pluginConfig = getPluginConfig(args)
-  let userConfig
+  const pluginConfig = getPluginConfig(args);
+  let userConfig;
   try {
-    userConfig = getUserConfig(args, {pluginConfig})
-  }
-  catch (e) {
-    return cb(e)
-  }
-
-  if (typeof buildConfig == 'function') {
-    buildConfig = buildConfig(args)
+    userConfig = getUserConfig(args, { pluginConfig });
+  } catch (e) {
+    return cb(e);
   }
 
-  let webpackConfig
+  if (typeof buildConfig === 'function') {
+    buildConfig = buildConfig(args);
+  }
+
+  let webpackConfig;
   try {
-    webpackConfig = createWebpackConfig(buildConfig, pluginConfig, userConfig)
-  }
-  catch (e) {
-    return cb(e)
+    webpackConfig = createWebpackConfig(buildConfig, pluginConfig, userConfig);
+  } catch (e) {
+    return cb(e);
   }
 
-  debug('webpack config: %s', deepToString(webpackConfig))
+  debug('webpack config: %s', deepToString(webpackConfig));
 
-  let spinner
+  let spinner;
   if (type) {
-    spinner = ora(`Building ${type}`).start()
+    spinner = ora(`Building ${type}`).start();
   }
-  let compiler = webpack(webpackConfig)
+  const compiler = webpack(webpackConfig);
   compiler.run((err, stats) => {
     if (err) {
       if (spinner) {
-        spinner.fail()
+        spinner.fail();
       }
-      return cb(err)
+      return cb(err);
     }
     if (spinner || stats.hasErrors()) {
-      logBuildResults(stats, spinner)
+      logBuildResults(stats, spinner);
     }
     if (stats.hasErrors()) {
-      return cb(new Error('Build failed with errors.'))
+      return cb(new Error('Build failed with errors.'));
     }
-    cb(null, stats)
-  })
+    cb(null, stats);
+  });
 }

@@ -1,12 +1,12 @@
-var express = require('express')
+const express = require('express');
 
-var app = express()
+const app = express();
 
-app.use(require(process.env.NWB_EXPRESS_MIDDLEWARE)(express))
+app.use(require(process.env.NWB_EXPRESS_MIDDLEWARE)(express));
 
-app.listen(3001, 'localhost', function(err) {
+app.listen(3001, 'localhost', (err) => {
   if (err) {
-    console.error('error starting express-middleware test server')
+    console.error('error starting express-middleware test server');
   }
-  console.log('express-middleware test server listening at http://localhost:3001')
-})
+  console.log('express-middleware test server listening at http://localhost:3001');
+});

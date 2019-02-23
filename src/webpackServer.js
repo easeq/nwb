@@ -1,13 +1,13 @@
-import {yellow} from 'chalk'
-import detect from 'detect-port'
-import inquirer from 'inquirer'
+import { yellow } from 'chalk';
+import detect from 'detect-port';
+import inquirer from 'inquirer';
 
-import {getPluginConfig, getUserConfig} from './config'
-import {DEFAULT_PORT} from './constants'
-import createServerWebpackConfig from './createServerWebpackConfig'
-import debug from './debug'
-import devServer from './devServer'
-import {clearConsole, deepToString, typeOf} from './utils'
+import { getPluginConfig, getUserConfig } from './config';
+import { DEFAULT_PORT } from './constants';
+import createServerWebpackConfig from './createServerWebpackConfig';
+import debug from './debug';
+import devServer from './devServer';
+import { clearConsole, deepToString, typeOf } from './utils';
 
 /**
  * Get the port to run the server on, detecting if the intended port is
@@ -15,17 +15,17 @@ import {clearConsole, deepToString, typeOf} from './utils'
  */
 function getServerPort(args, intendedPort, cb) {
   detect(intendedPort, (err, suggestedPort) => {
-    if (err) return cb(err)
+    if (err) return cb(err);
     // No need to prompt if the intended port is available
-    if (suggestedPort === intendedPort) return cb(null, suggestedPort)
+    if (suggestedPort === intendedPort) return cb(null, suggestedPort);
     // Support use of --force to avoid interactive prompt
-    if (args.force) return cb(null, suggestedPort)
+    if (args.force) return cb(null, suggestedPort);
 
     if (args.clear !== false && args.clearConsole !== false) {
-      clearConsole()
+      clearConsole();
     }
-    console.log(yellow(`Something is already running on port ${intendedPort}.`))
-    console.log()
+    console.log(yellow(`Something is already running on port ${intendedPort}.`));
+    console.log();
     inquirer.prompt([
       {
         type: 'confirm',
@@ -34,10 +34,10 @@ function getServerPort(args, intendedPort, cb) {
         default: true,
       },
     ]).then(
-      ({run}) => cb(null, run ? suggestedPort : null),
-      (err) => cb(err)
-    )
-  })
+      ({ run }) => cb(null, run ? suggestedPort : null),
+      err => cb(err),
+    );
+  });
 }
 
 /**
@@ -47,62 +47,59 @@ export default function webpackServer(args, buildConfig, cb) {
   // Default environment to development - we also run the dev server while
   // testing to check that HMR works.
   if (!process.env.NODE_ENV) {
-    process.env.NODE_ENV = 'development'
+    process.env.NODE_ENV = 'development';
   }
 
-  if (typeof buildConfig == 'function') {
-    buildConfig = buildConfig(args)
+  if (typeof buildConfig === 'function') {
+    buildConfig = buildConfig(args);
   }
 
-  let serverConfig
+  let serverConfig;
   try {
-    let pluginConfig = getPluginConfig(args)
-    serverConfig = getUserConfig(args, {pluginConfig}).devServer
-  }
-  catch (e) {
-    return cb(e)
+    const pluginConfig = getPluginConfig(args);
+    serverConfig = getUserConfig(args, { pluginConfig }).devServer;
+  } catch (e) {
+    return cb(e);
   }
 
   getServerPort(args, args.port || Number(serverConfig.port) || DEFAULT_PORT, (err, port) => {
-    if (err) return cb(err)
+    if (err) return cb(err);
     // A null port indicates the user chose not to run the server when prompted
-    if (port === null) return cb()
+    if (port === null) return cb();
 
-    serverConfig.port = port
+    serverConfig.port = port;
     // Fallback index serving can be disabled with --no-fallback
     if (args.fallback === false) {
-      serverConfig.historyApiFallback = false
-    }
-    // Fallback index serving can be configured with dot arguments
-    // e.g. --fallback.disableDotRule --fallback.verbose
-    else if (typeOf(args.fallback) === 'object') {
-      serverConfig.historyApiFallback = args.fallback
+      serverConfig.historyApiFallback = false;
+    } else if (typeOf(args.fallback) === 'object') {
+      // Fallback index serving can be configured with dot arguments
+      // e.g. --fallback.disableDotRule --fallback.verbose
+      serverConfig.historyApiFallback = args.fallback;
     }
     // The host can be overridden with --host
-    if (args.host) serverConfig.host = args.host
+    if (args.host) serverConfig.host = args.host;
     // Open a browser with --open (default browser) or --open="browser name"
-    if (args.open) serverConfig.open = args.open
+    if (args.open) serverConfig.open = args.open;
 
-    let url = `http${serverConfig.https ? 's' : ''}://${args.host || 'localhost'}:${port}/`
+    const url = `http${serverConfig.https ? 's' : ''}://${args.host || 'localhost'}:${port}/`;
 
     if (!('status' in buildConfig.plugins)) {
       buildConfig.plugins.status = {
         disableClearConsole: args.clear === false || args['clear-console'] === false,
         successMessage:
           `The app is running at ${url}`,
-      }
+      };
     }
 
-    let webpackConfig
+    let webpackConfig;
     try {
-      webpackConfig = createServerWebpackConfig(args, buildConfig, serverConfig)
-    }
-    catch (e) {
-      return cb(e)
+      webpackConfig = createServerWebpackConfig(args, buildConfig, serverConfig);
+    } catch (e) {
+      return cb(e);
     }
 
-    debug('webpack config: %s', deepToString(webpackConfig))
+    debug('webpack config: %s', deepToString(webpackConfig));
 
-    devServer(webpackConfig, serverConfig, url, cb)
-  })
+    devServer(webpackConfig, serverConfig, url, cb);
+  });
 }

@@ -1,16 +1,16 @@
 // @flow
-import path from 'path'
+import path from 'path';
 
-import runSeries from 'run-series'
-import merge from 'webpack-merge'
+import runSeries from 'run-series';
+import merge from 'webpack-merge';
 
-import cleanApp from './commands/clean-app'
-import {UserError} from './errors'
-import {install} from './utils'
-import webpackBuild from './webpackBuild'
-import webpackServer from './webpackServer'
+import cleanApp from './commands/clean-app';
+import { UserError } from './errors';
+import { install } from './utils';
+import webpackBuild from './webpackBuild';
+import webpackServer from './webpackServer';
 
-import type {ErrBack} from './types'
+import type { ErrBack } from './types';
 
 type QuickConfigOptions = {
   // Extra command config to be merged in
@@ -33,48 +33,25 @@ type QuickAppConfig = {
 };
 
 /**
- * Create a quick build, installing any required dependencies first if
- * they're not resolvable.
- */
-export function build(args: Object, appConfig: QuickAppConfig, cb: ErrBack) {
-  if (args._.length === 1) {
-    return cb(new UserError('An entry module must be specified.'))
-  }
-
-  let dist = args._[2] || 'dist'
-
-  runSeries([
-    (cb) => install(appConfig.getQuickDependencies(), {args, check: true}, cb),
-    (cb) => cleanApp({_: ['clean-app', dist]}, cb),
-    (cb) => webpackBuild(
-      `${appConfig.getName()} app`,
-      args,
-      () => createBuildConfig(args, appConfig.getQuickBuildConfig()),
-      cb
-    ),
-  ], cb)
-}
-
-/**
  * Create default command config for a quick app build and merge any extra
  * config provided into it.
  */
 export function createBuildConfig(args: Object, options: QuickConfigOptions) {
-  let {
+  const {
     commandConfig: extraConfig = {},
     defaultTitle,
     renderShim,
     renderShimAliases,
-  } = options
+  } = options;
 
-  let entry = path.resolve(args._[1])
-  let dist = path.resolve(args._[2] || 'dist')
-  let mountId = args['mount-id'] || 'app'
+  const entry = path.resolve(args._[1]);
+  const dist = path.resolve(args._[2] || 'dist');
+  const mountId = args['mount-id'] || 'app';
 
-  let production = process.env.NODE_ENV === 'production'
-  let filenamePattern = production ? '[name].[chunkhash:8].js' : '[name].js'
+  const production = process.env.NODE_ENV === 'production';
+  const filenamePattern = production ? '[name].[chunkhash:8].js' : '[name].js';
 
-  let config: Object = {
+  const config: Object = {
     babel: {
       stage: 0,
     },
@@ -93,30 +70,52 @@ export function createBuildConfig(args: Object, options: QuickConfigOptions) {
       // A vendor bundle can be explicitly enabled with a --vendor flag
       vendor: args.vendor,
     },
-  }
+  };
 
   if (renderShim == null || args.force === true) {
-    config.entry = {app: [entry]}
-  }
-  else {
+    config.entry = { app: [entry] };
+  } else {
     // Use a render shim module which supports quick prototyping
-    config.entry = {app: [renderShim]}
-    config.plugins.define = {NWB_QUICK_MOUNT_ID: JSON.stringify(mountId)}
+    config.entry = { app: [renderShim] };
+    config.plugins.define = { NWB_QUICK_MOUNT_ID: JSON.stringify(mountId) };
     config.resolve = {
       alias: {
         // Allow the render shim module to import the provided entry module
         'nwb-quick-entry': entry,
         // Allow the render shim module to import modules from the cwd
         ...renderShimAliases,
-      }
-    }
+      },
+    };
   }
 
   if (args.polyfill === false || args.polyfills === false) {
-    config.polyfill = false
+    config.polyfill = false;
   }
 
-  return merge(config, extraConfig)
+  return merge(config, extraConfig);
+}
+
+/**
+ * Create a quick build, installing any required dependencies first if
+ * they're not resolvable.
+ */
+export function build(args: Object, appConfig: QuickAppConfig, cb: ErrBack) {
+  if (args._.length === 1) {
+    return cb(new UserError('An entry module must be specified.'));
+  }
+
+  const dist = args._[2] || 'dist';
+
+  runSeries([
+    taskCb => install(appConfig.getQuickDependencies(), { args, check: true }, taskCb),
+    taskCb => cleanApp({ _: ['clean-app', dist] }, taskCb),
+    taskCb => webpackBuild(
+      `${appConfig.getName()} app`,
+      args,
+      () => createBuildConfig(args, appConfig.getQuickBuildConfig()),
+      taskCb,
+    ),
+  ], cb);
 }
 
 /**
@@ -124,20 +123,20 @@ export function createBuildConfig(args: Object, options: QuickConfigOptions) {
  * provided into it.
  */
 export function createServeConfig(args: Object, options: QuickConfigOptions) {
-  let {
+  const {
     commandConfig: extraConfig = {},
     defaultTitle,
     renderShim,
     renderShimAliases,
-  } = options
+  } = options;
 
-  let entry = path.resolve(args._[1])
-  let dist = path.resolve(args._[2] || 'dist')
-  let mountId = args['mount-id'] || 'app'
+  const entry = path.resolve(args._[1]);
+  const dist = path.resolve(args._[2] || 'dist');
+  const mountId = args['mount-id'] || 'app';
 
-  let config: Object = {
+  const config: Object = {
     babel: {
-      stage: 0
+      stage: 0,
     },
     output: {
       filename: 'app.js',
@@ -150,29 +149,28 @@ export function createServeConfig(args: Object, options: QuickConfigOptions) {
         title: args.title || defaultTitle,
       },
     },
-  }
+  };
 
   if (args.force === true || renderShim == null) {
-    config.entry = [entry]
-  }
-  else {
-    config.entry = [renderShim]
-    config.plugins.define = {NWB_QUICK_MOUNT_ID: JSON.stringify(mountId)}
+    config.entry = [entry];
+  } else {
+    config.entry = [renderShim];
+    config.plugins.define = { NWB_QUICK_MOUNT_ID: JSON.stringify(mountId) };
     config.resolve = {
       alias: {
         // Allow the render shim module to import the provided entry module
         'nwb-quick-entry': entry,
         // Allow the render shim module to import modules from the cwd
         ...renderShimAliases,
-      }
-    }
+      },
+    };
   }
 
   if (args.polyfill === false || args.polyfills === false) {
-    config.polyfill = false
+    config.polyfill = false;
   }
 
-  return merge(config, extraConfig)
+  return merge(config, extraConfig);
 }
 
 /**
@@ -181,11 +179,11 @@ export function createServeConfig(args: Object, options: QuickConfigOptions) {
  */
 export function serve(args: Object, appConfig: QuickAppConfig, cb: ErrBack) {
   if (args._.length === 1) {
-    return cb(new UserError('An entry module must be specified.'))
+    return cb(new UserError('An entry module must be specified.'));
   }
 
   runSeries([
-    (cb) => install(appConfig.getQuickDependencies(), {args, check: true}, cb),
-    (cb) => webpackServer(args, createServeConfig(args, appConfig.getQuickServeConfig()), cb),
-  ], cb)
+    taskCb => install(appConfig.getQuickDependencies(), { args, check: true }, taskCb),
+    taskCb => webpackServer(args, createServeConfig(args, appConfig.getQuickServeConfig()), taskCb),
+  ], cb);
 }

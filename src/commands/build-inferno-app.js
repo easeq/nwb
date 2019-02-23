@@ -1,12 +1,12 @@
 // @flow
-import {build} from '../appCommands'
-import infernoConfig from '../inferno'
+import { build } from '../appCommands';
+import infernoConfig from '../inferno';
 
-import type {ErrBack} from '../types'
+import type { ErrBack } from '../types';
 
 /**
  * Build an Inferno app.
  */
 export default function buildPreactApp(args: Object, cb: ErrBack) {
-  build(args, infernoConfig(args), cb)
+  build(args, infernoConfig(args), cb);
 }

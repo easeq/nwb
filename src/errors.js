@@ -5,25 +5,27 @@
  */
 export class UserError extends Error {
   constructor(message: string) {
-    super(message)
+    super(message);
     // Make instanceof UserError work in ES5
     // $FlowFixMe
-    this.constructor = UserError
+    this.constructor = UserError;
     // $FlowFixMe
-    this.__proto__ = UserError.prototype // eslint-disable-line no-proto
+    this.__proto__ = UserError.prototype; // eslint-disable-line no-proto
   }
 }
 
 export class KarmaExitCodeError {
   exitCode: number;
+
   constructor(exitCode: number) {
-    this.exitCode = exitCode
+    this.exitCode = exitCode;
   }
 }
 
 export class ConfigValidationError {
   report: Object;
+
   constructor(report: Object) {
-    this.report = report
+    this.report = report;
   }
 }

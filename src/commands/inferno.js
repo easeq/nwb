@@ -1,39 +1,39 @@
 // @flow
-import {cyan as opt, green as cmd, red, yellow as req} from 'chalk'
-import parseArgs from 'minimist'
+import {
+  cyan as opt, green as cmd, red, yellow as req,
+} from 'chalk';
+import parseArgs from 'minimist';
 
-import {CONFIG_FILE_NAME} from '../constants'
-import {ConfigValidationError, UserError} from '../errors'
+import { CONFIG_FILE_NAME } from '../constants';
+import { ConfigValidationError, UserError } from '../errors';
 
 const COMMAND_MODULES = {
   build: 'build-inferno',
   run: 'serve-inferno',
-}
+};
 
 function handleError(error) {
   if (error instanceof UserError) {
-    console.error(red(error.message))
-  }
-  else if (error instanceof ConfigValidationError) {
-    error.report.log()
-  }
-  else {
-    console.error(red(`Error running command: ${error.message}`))
+    console.error(red(error.message));
+  } else if (error instanceof ConfigValidationError) {
+    error.report.log();
+  } else {
+    console.error(red(`Error running command: ${error.message}`));
     if (error.stack) {
-      console.error(error.stack)
+      console.error(error.stack);
     }
   }
-  process.exit(1)
+  process.exit(1);
 }
 
-let args = parseArgs(process.argv.slice(3), {
+const args = parseArgs(process.argv.slice(3), {
   alias: {
     c: 'config',
     p: 'plugins',
-  }
-})
+  },
+});
 
-let command = args._[0]
+const command = args._[0];
 
 if (!command || /^h(elp)?$/.test(command)) {
   console.log(`Usage: ${cmd('nwb inferno')} ${req('(run|build)')} ${opt('[options]')}
@@ -73,22 +73,21 @@ Commands:
       ${opt('--no-polyfill')}  disable bundling of default polyfills
       ${opt('--title')}        contents for <title> ${opt('[default: Inferno App]')}
       ${opt('--vendor')}       create a 'vendor' bundle for node_modules/ modules
-`)
-  process.exit(command ? 0 : 1)
+`);
+  process.exit(command ? 0 : 1);
 }
 
 if (!COMMAND_MODULES.hasOwnProperty(command)) {
-  console.error(`${red('Unknown inferno command:')} ${req(command)}`)
-  process.exit(1)
+  console.error(`${red('Unknown inferno command:')} ${req(command)}`);
+  process.exit(1);
 }
 
-let commandModule = require(`./${COMMAND_MODULES[command]}`)
+const commandModule = require(`./${COMMAND_MODULES[command]}`);
 
 try {
-  commandModule(args, err => {
-    if (err) handleError(err)
-  })
-}
-catch (e) {
-  handleError(e)
+  commandModule(args, (err) => {
+    if (err) handleError(err);
+  });
+} catch (e) {
+  handleError(e);
 }

@@ -1,28 +1,28 @@
 // @flow
-import {modulePath} from '../utils'
+import { modulePath } from '../utils';
 
 function getBaseConfig() {
   return {
     babel: {
-      presets: [require.resolve('./preact-preset')]
+      presets: [require.resolve('./preact-preset')],
     },
     // Allow compatible React components to be used
     resolve: {
       alias: {
-        'react': 'preact-compat',
+        react: 'preact-compat',
         'react-dom': 'preact-compat',
         'create-react-class': 'preact-compat/lib/create-react-class',
-      }
+      },
     },
-  }
+  };
 }
 
 function getDependencies() {
-  return ['preact']
+  return ['preact'];
 }
 
 function getCompatDependencies() {
-  return ['preact-compat']
+  return ['preact-compat'];
 }
 
 function getQuickConfig() {
@@ -31,32 +31,32 @@ function getQuickConfig() {
     defaultTitle: 'Preact App',
     renderShim: require.resolve('./renderShim'),
     renderShimAliases: {
-      'preact': modulePath('preact'),
-    }
-  }
+      preact: modulePath('preact'),
+    },
+  };
 }
 
 export default (args: Object) => ({
   getName: () => 'Preact',
   getProjectDefaults() {
-    return {compat: false}
+    return { compat: false };
   },
   getProjectDependencies(answers: Object): string[] {
-    let deps = getDependencies()
+    let deps = getDependencies();
     if (answers.compat) {
-      deps = deps.concat(getCompatDependencies())
+      deps = deps.concat(getCompatDependencies());
     }
-    return deps
+    return deps;
   },
   getProjectQuestions() {
-    let defaults = this.getProjectDefaults()
+    const defaults = this.getProjectDefaults();
     return [{
       when: () => !('compat' in args),
       type: 'confirm',
       name: 'compat',
       message: 'Do you want to use preact-compat so you can use React modules?',
       default: defaults.compat,
-    }]
+    }];
   },
   getBuildDependencies: () => [],
   getBuildConfig: getBaseConfig,
@@ -65,4 +65,4 @@ export default (args: Object) => ({
   getQuickBuildConfig: getQuickConfig,
   getQuickServeConfig: getQuickConfig,
   getKarmaTestConfig: getBaseConfig,
-})
+});
