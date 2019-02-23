@@ -11,11 +11,13 @@ import cli from '../../src/cli';
 const stripHashes = files => files.map(file => file.replace(/\.\w{8}\./, '.'));
 
 describe('command: build', () => {
-  this.timeout(90000);
-
   let originalCwd;
   let originalNodeEnv;
   let tmpDir;
+
+  beforeEach((done) => {
+    this.timeout(90000);
+  });
 
   function setUp() {
     originalCwd = process.cwd();

@@ -156,12 +156,11 @@ function webModuleAssertions(dir, name, err, done) {
 }
 
 describe('command: nwb new', () => {
-  this.timeout(40000);
-
   let originalCwd;
   let tmpDir;
 
-  beforeEach(() => {
+  beforeEach((done) => {
+    this.timeout(30000);
     originalCwd = process.cwd();
     tmpDir = temp.mkdirSync('nwb-new');
     process.chdir(tmpDir);
@@ -173,7 +172,10 @@ describe('command: nwb new', () => {
   });
 
   describe('with missing or invalid arguments', () => {
-    this.timeout(200);
+    beforeEach((done) => {
+      this.timeout(200);
+    });
+
     it('prints usage info without any arguments', (done) => {
       cli(['new'], (err) => {
         expect(err).toExist();
@@ -238,13 +240,12 @@ describe('command: nwb new', () => {
 });
 
 describe('command: nwb init', () => {
-  this.timeout(40000);
-
   let originalCwd;
   let tmpDir;
   let defaultName;
 
   beforeEach(() => {
+    this.timeout(40000);
     originalCwd = process.cwd();
     tmpDir = temp.mkdirSync('nwb-init');
     defaultName = path.basename(tmpDir);
@@ -257,7 +258,10 @@ describe('command: nwb init', () => {
   });
 
   describe('with missing or invalid arguments', () => {
-    this.timeout(200);
+    beforeEach(() => {
+      this.timeout(200);
+    });
+
     it('prints usage info without any arguments', (done) => {
       cli(['init'], (err) => {
         expect(err).toExist();

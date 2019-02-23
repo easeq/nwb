@@ -9,12 +9,11 @@ import temp from 'temp';
 import cli from '../../src/cli';
 
 describe('command: test', () => {
-  this.timeout(90000);
-
   let originalCwd;
   let tmpDir;
 
   beforeEach(() => {
+    this.timeout(90000);
     originalCwd = process.cwd();
     tmpDir = temp.mkdirSync('nwb-test');
     process.chdir(tmpDir);

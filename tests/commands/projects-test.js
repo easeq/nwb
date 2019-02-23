@@ -23,7 +23,9 @@ const States = {
 };
 
 describe('sample projects', () => {
-  this.timeout(90000);
+  beforeEach((done) => {
+    this.timeout(90000);
+  });
 
   describe('async-await project', () => {
     let originalCwd;
@@ -235,11 +237,13 @@ describe('sample projects', () => {
   });
 
   describe('router-app project', () => {
-    this.timeout(120000);
-
     let originalCwd;
     let originalNodeEnv;
     let tmpDir;
+
+    beforeEach((done) => {
+      this.timeout(120000);
+    });
 
     before((done) => {
       originalCwd = process.cwd();

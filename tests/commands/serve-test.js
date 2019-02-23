@@ -20,7 +20,9 @@ const States = {
 // XXX Dev serving is now done with webpack-dev-server - this will need to be
 //     rewriten to do whatever its own HMR client does.
 describe.skip('command: serve', () => {
-  this.timeout(90000);
+  beforeEach((done) => {
+    this.timeout(90000);
+  });
 
   describe('serving a new React app with hot reloading', () => {
     let originalCwd;

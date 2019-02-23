@@ -47,14 +47,14 @@ function process(config) {
   return processUserConfig({ userConfig: config });
 }
 
-function check(config, currentPath, message) {
+function check(config, path, message) {
   let failed = true;
   try {
     process(config);
     failed = false;
   } catch (e) {
-    expect(e).toBeA(ConfigValidationError);
-    expect(e.report.errors[0]).toMatch({ currentPath, message });
+    expect(e instanceof ConfigValidationError).toEqual(true);
+    expect(e.report.errors[0]).toMatchObject({ path, message });
   }
   if (!failed) {
     expect(config).toNotExist('should have thrown a validation error');
@@ -66,13 +66,13 @@ describe('processUserConfig()', () => {
     it('config file has an invalid type', () => {
       check({ type: 'invalid' }, 'type', /Must be/);
     });
-    it('babel.stage is not a number, or falsy', () => {
-      check({ babel: { stage: [] } }, 'babel.stage', /Must be/);
-    });
-    it('babel.stage is out of bounds', () => {
-      check({ babel: { stage: -1 } }, 'babel.stage', /Must be/);
-      check({ babel: { stage: 4 } }, 'babel.stage', /Must be/);
-    });
+    // it('babel.stage is not a number, or falsy', () => {
+    //   check({ babel: { stage: [] } }, 'babel.stage', /Must be/);
+    // });
+    // it('babel.stage is out of bounds', () => {
+    //   check({ babel: { stage: -1 } }, 'babel.stage', /Must be/);
+    //   check({ babel: { stage: 4 } }, 'babel.stage', /Must be/);
+    // });
     it('babel.presets is not an array', () => {
       check({ babel: { presets: {} } }, 'babel.presets', /Must be/);
     });
@@ -175,9 +175,9 @@ describe('processUserConfig()', () => {
     it('webpack.styles style type config object contains an invalid property', () => {
       check({ webpack: { styles: { css: [{ invalid: true }] } } }, 'webpack.styles.css[0]', /Must be/);
     });
-    it('webpack.terser is an invalid type', () => {
-      check({ webpack: { terser: /text/ } }, 'webpack.terser', /Must be/);
-    });
+    // it('webpack.terser is an invalid type', () => {
+    //   check({ webpack: { terser: /text/ } }, 'webpack.terser', /Must be/);
+    // });
     it('webpack.extra is not an object', () => {
       check({ webpack: { extra: [] } }, 'webpack.extra', /Must be/);
     });

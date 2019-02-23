@@ -29,7 +29,9 @@ describe('findPlugin()', () => {
 });
 
 describe('getKarmaPluginConfig()', () => {
-  this.timeout(10000);
+  beforeEach((done) => {
+    this.timeout(10000);
+  });
   describe('without user config', () => {
     const expectedDefaultPlugins = [
       'launcher:PhantomJS',
@@ -142,7 +144,7 @@ describe('createKarmaConfig()', () => {
   it('includes polyfill and default test files pattern', () => {
     const config = createKarmaConfig({}, {}, {}, {});
     expect(config.files).toEqual([
-      require.resolve('babel-polyfill/dist/polyfill.js'),
+      require.resolve('@babel/polyfill/dist/polyfill.js'),
       '+(src|test?(s))/**/*+(-test|.spec|.test).js',
     ]);
   });
